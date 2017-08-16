@@ -28,9 +28,8 @@ namespace UrlsAndRoutes.Tests
             return mockContext.Object;
         }
 
-        [TestMethod]
-        public void TestRouteMatch(string url, string controller, string action,
-            object routeProperties, string httpMethod = "GET")
+        private void TestRouteMatch(string url, string controller, string action,
+            object routeProperties = null, string httpMethod = "GET")
         {
             RouteCollection routes = new RouteCollection();
             RouteConfig.RegisterRoutes(routes);
@@ -39,6 +38,25 @@ namespace UrlsAndRoutes.Tests
 
             Assert.IsNotNull(result);
             Assert.IsTrue(TestIncomingRouteResult(result, controller, action, routeProperties));
+        }
+
+        private void TestRouteFail(string url)
+        {
+            RouteCollection collection = new RouteCollection();
+            RouteConfig.RegisterRoutes(collection);
+
+            RouteData result = collection.GetRouteData(CreateHttpContext(url));
+            Assert.IsTrue(result == null || result.Route == null);
+        }
+
+        [TestMethod]
+        public void TestIncomingRoutes()
+        {
+            TestRouteMatch("~/Admin/Index", "Admin", "Index");
+            TestRouteMatch("~/A/B", "A", "B");
+
+            TestRouteFail("~/A");
+            TestRouteFail("~/A/B/C");
         }
 
         private bool TestIncomingRouteResult(RouteData routeResult, string controller,
